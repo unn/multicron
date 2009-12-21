@@ -1,0 +1,95 @@
+<?php
+// $Id$
+
+/**
+ * Implementation of hook_menu().
+ */
+function multicron_menu() {
+  $items['admin/settings/multicron'] = array(
+    'title' => 'Multicron',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('multicron_admin_settings'),
+    'description' => 'Setup Multicron.',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration')
+  );
+  return $items;
+}
+
+/**
+ * FAPI of admin secion.
+ */
+function multicron_admin_settings() {
+  $form['settings'] = array(
+    '#title' => t('Your sites'),
+    '#type'  => 'fieldset',
+    '#description' => t('Please fill out which sites you want cron run on.'),
+    '#weight' => 0,
+  );
+  // @todo offer different methods of running cron other then curl
+  // @todo automatic scan of the sites folder to prepopulate
+  $form['settings']['multicron_sites'] = array(
+    '#title' => 'Your sites',
+    '#type'  => 'textarea',
+    '#description' => t('The fully qualified url to cron.php. For example, http://example.com/cron.php.'),
+    '#default_value' => variable_get('multicron_sites', NULL),
+    '#weight' => 1,
+  );
+  return system_settings_form($form);
+}
+
+/**
+ * Validating form submission from admin.
+ */
+function multicron_admin_settings_validate($form, $form_state) {
+  $error = FALSE;
+  $cron_sites = explode("\n", $form_state['values']['multicron_sites']);
+  foreach ($cron_sites as $site) {
+    if (!$pos = strpos($site, 'cron.php')) {
+      $error = TRUE;
+    }
+    if (!preg_match('^(?#Protocol)(?:(?:ht|f)tp(?:s?)\:\/\/|~\/|\/)?(?#Username:Password)(?:\w+:\w+@)?(?#Subdomains)(?:(?:[-\w\d{1-3}]+\.)+(?#TopLevel Domains)(?:com|org|net|gov|mil|biz|info|mobi|name|aero|jobs|edu|co\.uk|ac\.uk|it|fr|tv|museum|asia|local|travel|[a-z]{2})?)(?#Port)(?::[\d]{1,5})?(?#Directories)(?:(?:(?:\/(?:[-\w~!$+|.,=]|%[a-f\d]{2})+)+|\/)+|\?|#)?(?#Query)(?:(?:\?(?:[-\w~!$+|.,*:]|%[a-f\d{2}])+=?(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)(?:&(?:[-\w~!$+|.,*:]|%[a-f\d{2}])+=?(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)*)*(?#Anchor)(?:#(?:[-\w~!$+|.,*:=]|%[a-f\d]{2})*)?$^', $site)) {
+      // regex from https://wave.google.com/wave/?pli=1#restored:wave:googlewave.com!w%252BsFbGJUukA
+      $error = TRUE;
+    }
+  }
+
+  // @todo trim off extra newlines not sure if that goes here....
+
+  if ($error) {
+    form_set_error('multicron_sites', t('Please use a fully qualified url that includes cron.php'));
+  }
+}
+
+/**
+ * Implementation of hook_cron().
+ */
+function multicron_cron() {
+  $cron_sites = explode("\n", variable_get('multicron_sites', NULL));
+
+  $mh = curl_multi_init();
+  $threads = NULL;
+  foreach ($cron_sites as $name => $url) {
+    $c[$name]=curl_init($url);
+//    $f[$name]=fopen ($name.".xml", "w");
+//    curl_setopt ($c[$name], CURLOPT_FILE, $f[$name]);
+    curl_setopt($c[$name], CURLOPT_TIMEOUT, 600);
+    curl_multi_add_handle($mh, $c[$name]);
+    $message = t('Multicron attempted to fetch and run at %site', array('%site' => $url));
+    watchdog('cron', $message);
+  }
+
+  $t1 = time();
+
+  do {
+    $n=curl_multi_exec($mh, $threads);
+  }
+  while ($threads > 0);
+
+  foreach ($cron_sites as $name => $url) {
+    curl_multi_remove_handle($mh, $c[$name]);
+    curl_close($c[$name]);
+//    fclose ($f[$name]);
+  }
+  curl_multi_close($mh);
+}

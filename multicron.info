@@ -1,0 +1,4 @@
+; $Id$
+name = Multicron
+description = This'll run multisite cron events
+core = 6.x
