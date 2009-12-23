@@ -17,7 +17,7 @@ function multicron_menu() {
 }
 
 /**
- * FAPI of admin secion.
+ * FAPI of admin section.
  */
 function multicron_admin_settings() {
   $form['settings'] = array(
@@ -43,7 +43,10 @@ function multicron_admin_settings() {
  */
 function multicron_admin_settings_validate($form, $form_state) {
   $error = FALSE;
-  $cron_sites = explode("\n", $form_state['values']['multicron_sites']);
+  
+  $form_state['values']['multicron_sites'] = check_plain($form_state['values']['multicron_sites']);
+  
+  $cron_sites = explode("\n", $clean);
   foreach ($cron_sites as $site) {
     if (!$pos = strpos($site, 'cron.php')) {
       $error = TRUE;
@@ -57,7 +60,7 @@ function multicron_admin_settings_validate($form, $form_state) {
   // @todo trim off extra newlines not sure if that goes here....
 
   if ($error) {
-    form_set_error('multicron_sites', t('Please use a fully qualified url that includes cron.php'));
+    form_set_error('multicron_sites', t('Please use a fully qualified url that includes cron.php.'));
   }
 }
 
@@ -65,6 +68,7 @@ function multicron_admin_settings_validate($form, $form_state) {
  * Implementation of hook_cron().
  */
 function multicron_cron() {
+  // drupal_http_request might be more appropriate, need to run some trials
   $cron_sites = explode("\n", variable_get('multicron_sites', NULL));
 
   $mh = curl_multi_init();
