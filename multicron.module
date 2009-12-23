@@ -1,6 +1,9 @@
 <?php
 // $Id$
 
+// function hook_perm() {}
+// function hook_requirements() {}
+
 /**
  * Implementation of hook_menu().
  */
