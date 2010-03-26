@@ -1,0 +1,31 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Contains install and update functions for multicron.
+ */
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function multicron_uninstall() {
+  variable_del('multicron_sites');
+}
+
+/**
+ * Implementation of hook_requirements().
+ */
+function multicron_requirements() {
+  $t = get_t();
+
+  if (!in_array('curl', get_loaded_extensions())) {
+    $requirements['multicron'] = array(
+      'title' => $t('Multicron'),
+      'severity' => REQUIREMENT_ERROR,
+      'description' => $t('Please ensure that the cURL extension is installed in PHP.'),
+      'value' => $t('cURL is not installed')
+    );
+  }
+  return $requirements;
+}

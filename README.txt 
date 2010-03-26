@@ -1,0 +1,18 @@
+README.txt
+==========
+This module enables multisite Drupal to run cron across all sites or 
+a specific set of sites.
+
+INSTALLATION
+============
+Unarchive into your sites modules directory. Visit admin/settings/multicron
+to setup which sites you want to batch cron. Make sure cron is running on
+the site you installed the module in.
+
+TROUBLESHOOTING
+===============
+Is cron running?
+
+AUTHOR/MAINTAINER
+=================
+-David Stoline
