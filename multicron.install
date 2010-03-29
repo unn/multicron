@@ -16,7 +16,7 @@ function multicron_uninstall() {
 /**
  * Implementation of hook_requirements().
  */
-function multicron_requirements() {
+function multicron_requirements($phase) {
   $t = get_t();
 
   if (!in_array('curl', get_loaded_extensions())) {

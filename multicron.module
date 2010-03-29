@@ -1,9 +1,6 @@
 <?php
 // $Id$
 
-// function hook_perm() {}
-// function hook_requirements() {}
-
 /**
  * @file
  * Multicron primary module file.
@@ -47,7 +44,7 @@ function multicron_admin_settings() {
     '#description' => t('Please fill out which sites you want cron run on.'),
   );
   $form['settings']['multicron_sites'] = array(
-    '#title' => 'Your sites',
+    '#title' => t('Your sites'),
     '#type'  => 'textarea',
     '#description' => t('The fully qualified url to cron.php. For example, http://example.com/cron.php.'),
     '#default_value' => variable_get('multicron_sites', NULL),
@@ -60,10 +57,7 @@ function multicron_admin_settings() {
  */
 function multicron_admin_settings_validate($form, $form_state) {
   $error = FALSE;
-  
-  $form_state['values']['multicron_sites'] = check_plain($form_state['values']['multicron_sites']);
-  
-  $cron_sites = explode("\n", $clean);
+  $cron_sites = explode("\n", $form_state['values']['multicron_sites']);
   foreach ($cron_sites as $site) {
     if (!$pos = strpos($site, 'cron.php')) {
       $error = TRUE;
@@ -75,7 +69,7 @@ function multicron_admin_settings_validate($form, $form_state) {
   }
 
   if ($error) {
-    form_set_error('multicron_sites', t('Please use a fully qualified url that includes cron.php.'));
+    form_set_error('multicron_sites', t('Please use a fully qualified url that includes cron.php'));
   }
 }
 
@@ -83,7 +77,6 @@ function multicron_admin_settings_validate($form, $form_state) {
  * Implementation of hook_cron().
  */
 function multicron_cron() {
-  // drupal_http_request might be more appropriate, need to run some trials
   $cron_sites = explode("\n", variable_get('multicron_sites', NULL));
 
   $mh = curl_multi_init();
