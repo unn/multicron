@@ -1,3 +1,5 @@
+$Id$ 
+
 README.txt
 ==========
 This module enables multisite Drupal to run cron across all sites or 
