@@ -30,7 +30,7 @@ function multicron_menu() {
 function multicron_help($path, $arg) {
   switch ($path) {
     case 'admin/help#multicron':
-      return '<p>'. t('This module enables multisite Drupal to run cron across all sites or a specific set of sites.') .'</p>';
+      return '<p>' . t('This module enables multisite Drupal to run cron across all sites or a specific set of sites.') . '</p>';
   }
 }
 
