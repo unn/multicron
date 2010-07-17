@@ -16,10 +16,12 @@ function multicron_menu() {
   $items['admin/settings/multicron'] = array(
     'title' => 'Multicron',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('multicron_admin_settings'),
+    'page arguments' => array('multicron_overview_form'),
     'description' => 'Setup Multicron.',
-    'access callback' => 'user_access',
-    'access arguments' => array('administer site configuration')
+    'access arguments' => array('administer site configuration'),
+    'file' => 'multicron.admin.inc',
+    'type' => MENU_CALLBACK,
+    
   );
   return $items;
 }
@@ -32,6 +34,18 @@ function multicron_help($path, $arg) {
     case 'admin/help#multicron':
       return '<p>' . t('This module enables multisite Drupal to run cron across all sites or a specific set of sites.') . '</p>';
   }
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function multicron_theme() {
+  return array(
+    'multicron_overview_form' => array(
+      'file' => 'multicron.admin.inc',
+      'arguments' => array('form' => NULL),
+    ),
+  );
 }
 
 /**
